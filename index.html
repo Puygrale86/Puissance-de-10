@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entraînement : Puissances de 10</title>
+    <!-- Chargement de Tailwind CSS pour une mise en page fluide et responsive -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Police Inter et STIX Two Text pour un rendu mathématique clair -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=STIX+Two+Text:ital,wght@0,500;0,700;1,500&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Configuration typographique générale */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+
+        /* Police mathématique pour les expressions */
+        .math-expr {
+            font-family: 'STIX Two Text', 'Times New Roman', serif;
+            letter-spacing: 0.02em;
+        }
+
+        /* Style des exposants pour une lisibilité parfaite */
+        .math-expr sup {
+            font-size: 0.68em;
+            line-height: 0;
+            position: relative;
+            vertical-align: baseline;
+            top: -0.52em;
+            margin-left: 1px;
+        }
+
+        /* Effet papier subtil pour la feuille d'exercice */
+        .worksheet-card {
+            background: #ffffff;
+            box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Styles spécifiques pour l'impression papier */
+        @media print {
+            body {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+                padding: 0 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .worksheet-card {
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+            }
+            .calc-item {
+                break-inside: avoid;
+                border-color: #cbd5e1 !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen py-6 px-4 sm:py-10 sm:px-6">
+
+    <!-- Conteneur principal centré -->
+    <main class="max-w-4xl mx-auto">
+        
+        <!-- Feuille d'exercice -->
+        <section class="worksheet-card rounded-2xl p-6 sm:p-10">
+            
+            <!-- En-tête de la feuille -->
+            <div class="border-b-2 border-slate-100 pb-5 mb-5 flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2">
+                <div>
+                    <span class="no-print inline-block px-2.5 py-0.5 text-xs font-semibold tracking-wider uppercase text-indigo-700 bg-indigo-50 rounded-full mb-2">
+                        Mathématiques • Entraînement
+                    </span>
+                    <h1 class="text-lg sm:text-xl font-bold text-slate-900">
+                        Exercice d'entraînement — Puissances de 10
+                    </h1>
+                    <p class="text-sm sm:text-base text-slate-600 mt-1">
+                        Recopier et donner l'écriture décimale de chacune des expressions suivantes sur le cahier.
+                    </p>
+                </div>
+                <span id="seed-badge" class="no-print text-xs font-mono text-slate-400 shrink-0">
+                    Série #0000
+                </span>
+            </div>
+
+            <!-- Barre d'outils placée juste sous la consigne, au-dessus du calcul A (masquée à l'impression) -->
+            <div class="no-print flex flex-wrap items-center justify-between gap-2.5 mb-6">
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <button id="btn-new" type="button" 
+                        class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 rounded-xl shadow-sm transition-colors cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Nouvel énoncé
+                    </button>
+
+                    <button id="btn-toggle-corr" type="button" 
+                        class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 active:bg-slate-100 border border-slate-300 rounded-xl shadow-sm transition-colors cursor-pointer">
+                        <svg id="icon-eye" class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <span id="text-toggle-corr">Afficher la correction</span>
+                    </button>
+                </div>
+
+                <button id="btn-print" type="button" title="Imprimer la feuille"
+                    class="inline-flex items-center justify-center p-2.5 text-slate-600 bg-white hover:bg-slate-50 border border-slate-300 rounded-xl shadow-sm transition-colors cursor-pointer"
+                    aria-label="Imprimer l'exercice">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Liste des 5 calculs (A, B, C, D, E) -->
+            <div id="exercises-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+                <!-- Généré dynamiquement par JavaScript -->
+            </div>
+
+            <!-- Section Correction (masquée par défaut) -->
+            <div id="correction-section" class="hidden mt-8 pt-7 border-t-2 border-dashed border-slate-200">
+                <div class="flex items-center gap-2.5 mb-5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                    <h3 class="text-lg font-bold text-slate-800">Correction détaillée</h3>
+                </div>
+
+                <div id="corrections-container" class="space-y-3.5">
+                    <!-- Généré dynamiquement par JavaScript -->
+                </div>
+
+                <!-- Rappel méthodologique discret en bas de correction -->
+                <div class="mt-6 p-4 bg-slate-50 rounded-xl border border-slate-200/80 text-xs sm:text-sm text-slate-600 space-y-1.5">
+                    <p class="font-semibold text-slate-700">Rappels essentiels :</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><strong>Exposant positif (<span class="math-expr">10<sup>n</sup></span>) :</strong> Multiplier par <span class="math-expr">10<sup>n</sup></span> revient à décaler la virgule de <span class="math-expr">n</span> rangs vers la droite (le nombre grandit).</li>
+                        <li><strong>Exposant négatif (<span class="math-expr">10<sup>-n</sup></span>) :</strong> Multiplier par <span class="math-expr">10<sup>-n</sup></span> revient à décaler la virgule de <span class="math-expr">n</span> rangs vers la gauche (le nombre rapetisse).</li>
+                        <li><strong>Exposant zéro :</strong> <span class="math-expr">10<sup>0</sup> = 1</span>, donc <span class="math-expr">a × 10<sup>0</sup> = a × 1 = a</span>.</li>
+                    </ul>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Pied de page discret -->
+        <footer class="no-print mt-6 text-center text-xs text-slate-400">
+            Faites les calculs sur votre cahier avant d'afficher la correction.
+        </footer>
+
+    </main>
+
+    <script>
+        /**
+         * Application génératrice d'exercices sur les puissances de 10 (a × 10^n)
+         * Avec manipulation exacte des chaînes de chiffres pour éviter les imprécisions virgule flottante
+         */
+        (function () {
+            const exercisesContainer = document.getElementById('exercises-container');
+            const correctionsContainer = document.getElementById('corrections-container');
+            const correctionSection = document.getElementById('correction-section');
+            const btnNew = document.getElementById('btn-new');
+            const btnToggleCorr = document.getElementById('btn-toggle-corr');
+            const textToggleCorr = document.getElementById('text-toggle-corr');
+            const btnPrint = document.getElementById('btn-print');
+            const seedBadge = document.getElementById('seed-badge');
+
+            let isCorrectionVisible = false;
+            const LETTERS = ['A', 'B', 'C', 'D', 'E'];
+
+            /**
+             * Retourne un entier aléatoire entre min et max inclus
+             */
+            function randomInt(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+
+            /**
+             * Formate un nombre décimal positif représenté par (digits, decimalPlaces)
+             * selon la typographie française (virgule décimale et espaces insécables par groupes de 3)
+             */
+            function formatDecimalFR(digitsStr, decimalPlaces) {
+                // On s'assure d'avoir assez de zéros à gauche pour placer la virgule
+                let padded = digitsStr.padStart(decimalPlaces + 1, '0');
+                const splitIdx = padded.length - decimalPlaces;
+
+                let intPart = padded.slice(0, splitIdx);
+                let fracPart = padded.slice(splitIdx);
+
+                // Nettoyage des zéros inutiles en tête de partie entière (sauf le dernier zéro)
+                intPart = intPart.replace(/^0+(?=\d)/, '');
+                // Nettoyage des zéros inutiles en fin de partie décimale
+                fracPart = fracPart.replace(/0+$/, '');
+
+                // Espaces insécables par blocs de 3 chiffres sur la partie entière
+                const formattedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '\u00A0');
+
+                if (fracPart.length === 0) {
+                    return formattedInt;
+                }
+
+                // Espaces insécables par blocs de 3 chiffres sur la partie décimale si >= 4 chiffres
+                const formattedFrac = fracPart.replace(/(\d{3})(?=\d)/g, '$1\u00A0');
+                return `${formattedInt},${formattedFrac}`;
+            }
+
+            /**
+             * Génère un nombre décimal positif 'a' varié et pédagogique :
+             *  - Entiers simples (ex: 7, 25, 140)
+             *  - Décimaux avec partie entière non nulle (ex: 3,4 ; 12,85 ; 4,06)
+             *  - Décimaux inférieurs à 1 (ex: 0,45 ; 0,08 ; 0,7)
+             */
+            function generatePositiveDecimal() {
+                const profile = Math.random();
+                let rawDigits = '';
+                let decPlaces = 0;
+
+                if (profile < 0.25) {
+                    // Cas 1 : entier positif entre 1 et 250 (ex: 4, 37, 120)
+                    const val = randomInt(1, 250);
+                    rawDigits = String(val);
+                    decPlaces = 0;
+                } else if (profile < 0.75) {
+                    // Cas 2 : décimal avec partie entière entre 1 et 99 et 1 à 3 décimales (ex: 4,7 ; 15,24 ; 3,08)
+                    const intPart = randomInt(1, 99);
+                    decPlaces = randomInt(1, 3);
+                    const maxFrac = Math.pow(10, decPlaces) - 1;
+                    let fracVal = randomInt(1, maxFrac);
+                    // Évite que fracVal finisse par 0 pour garder exactement decPlaces chiffres significatifs
+                    if (fracVal % 10 === 0) fracVal += randomInt(1, 9);
+                    rawDigits = String(intPart) + String(fracVal).padStart(decPlaces, '0');
+                } else {
+                    // Cas 3 : décimal inférieur à 1 (ex: 0,6 ; 0,34 ; 0,075)
+                    decPlaces = randomInt(1, 3);
+                    const maxFrac = Math.pow(10, decPlaces) - 1;
+                    let fracVal = randomInt(1, maxFrac);
+                    if (fracVal % 10 === 0) fracVal += randomInt(1, 9);
+                    rawDigits = String(fracVal);
+                }
+
+                // Normalisation de rawDigits et decPlaces (suppression des zéros finaux derrière la virgule)
+                while (decPlaces > 0 && rawDigits.endsWith('0')) {
+                    rawDigits = rawDigits.slice(0, -1);
+                    decPlaces--;
+                }
+
+                return {
+                    digits: rawDigits,
+                    decPlaces: decPlaces,
+                    formatted: formatDecimalFR(rawDigits, decPlaces)
+                };
+            }
+
+            /**
+             * Calcule le résultat exact de (digits * 10^-decPlaces) * 10^exp
+             */
+            function multiplyByPowerOfTen(digits, decPlaces, exp) {
+                const netDecPlaces = decPlaces - exp;
+                if (netDecPlaces >= 0) {
+                    return formatDecimalFR(digits, netDecPlaces);
+                } else {
+                    const zerosToAppend = '0'.repeat(-netDecPlaces);
+                    return formatDecimalFR(digits + zerosToAppend, 0);
+                }
+            }
+
+            /**
+             * Génère l'écriture décimale explicite de 10^exp (ex: "1 000" ou "0,001")
+             */
+            function formatPowerOfTenValue(exp) {
+                if (exp >= 0) {
+                    return formatDecimalFR('1' + '0'.repeat(exp), 0);
+                } else {
+                    return formatDecimalFR('1', -exp);
+                }
+            }
+
+            /**
+             * Génère un calcul unique a × 10^n avec sa correction détaillée
+             */
+            function generateSingleExercise(letter, usedSignatures, forcedSignType) {
+                let decObj, exp, signature;
+
+                do {
+                    decObj = generatePositiveDecimal();
+
+                    // Répartition équilibrée entre exposants positifs, négatifs et nul
+                    if (forcedSignType === 'pos') {
+                        exp = randomInt(1, 5);
+                    } else if (forcedSignType === 'neg') {
+                        exp = randomInt(-5, -1);
+                    } else {
+                        exp = randomInt(-5, 5);
+                    }
+
+                    signature = `${decObj.formatted}_${exp}`;
+                } while (usedSignatures.has(signature));
+
+                usedSignatures.add(signature);
+
+                const expressionHTML = `${decObj.formatted} × 10<sup>${exp}</sup>`;
+                const finalResult = multiplyByPowerOfTen(decObj.digits, decObj.decPlaces, exp);
+                const powerDecimalValue = formatPowerOfTenValue(exp);
+
+                // Construction de l'étape intermédiaire pédagogique
+                let stepsHTML = '';
+                if (exp === 0) {
+                    stepsHTML = `
+                        <span class="text-slate-600">${decObj.formatted} × 1 = </span>
+                        <span class="font-bold text-emerald-700">${finalResult}</span>
+                    `;
+                } else {
+                    stepsHTML = `
+                        <span class="text-slate-600">${decObj.formatted} × ${powerDecimalValue} = </span>
+                        <span class="font-bold text-emerald-700">${finalResult}</span>
+                    `;
+                }
+
+                return {
+                    letter,
+                    expressionHTML,
+                    stepsHTML
+                };
+            }
+
+            /**
+             * Génère et affiche une nouvelle série de 5 exercices (A à E)
+             * Garantit au moins 2 exposants positifs et 2 exposants négatifs par série
+             */
+            function renderNewWorksheet() {
+                const usedSignatures = new Set();
+                const signPlan = ['pos', 'neg', 'pos', 'neg', 'any'].sort(() => Math.random() - 0.5);
+
+                const exercises = LETTERS.map((letter, idx) =>
+                    generateSingleExercise(letter, usedSignatures, signPlan[idx])
+                );
+
+                // Réinitialisation de l'affichage de la correction
+                isCorrectionVisible = false;
+                correctionSection.classList.add('hidden');
+                textToggleCorr.textContent = 'Afficher la correction';
+
+                // Numéro de série aléatoire à 4 chiffres
+                const seriesNumber = randomInt(1000, 9999);
+                seedBadge.textContent = `Série #${seriesNumber}`;
+
+                // Injection des énoncés (A à E)
+                exercisesContainer.innerHTML = exercises.map(ex => `
+                    <div class="calc-item flex items-center gap-4 p-4 sm:p-5 rounded-xl bg-slate-50/70 border border-slate-200/90">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 font-bold text-sm shrink-0">
+                            ${ex.letter}
+                        </span>
+                        <div class="math-expr text-xl sm:text-2xl text-slate-900">
+                            ${ex.letter} = ${ex.expressionHTML}
+                        </div>
+                    </div>
+                `).join('');
+
+                // Injection des corrections détaillées
+                correctionsContainer.innerHTML = exercises.map(ex => `
+                    <div class="calc-item flex flex-wrap items-center gap-x-3 gap-y-2 p-3.5 sm:p-4 rounded-xl bg-emerald-50/40 border border-emerald-200/80">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 font-bold text-xs shrink-0">
+                            ${ex.letter}
+                        </span>
+                        <div class="math-expr text-base sm:text-lg text-slate-800 flex flex-wrap items-center gap-x-2 gap-y-2">
+                            <span class="inline-flex items-center">${ex.letter} = ${ex.expressionHTML}</span>
+                            <span>=</span>
+                            ${ex.stepsHTML}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            /**
+             * Bascule l'affichage de la section correction
+             */
+            function toggleCorrection() {
+                isCorrectionVisible = !isCorrectionVisible;
+                if (isCorrectionVisible) {
+                    correctionSection.classList.remove('hidden');
+                    textToggleCorr.textContent = 'Masquer la correction';
+                } else {
+                    correctionSection.classList.add('hidden');
+                    textToggleCorr.textContent = 'Afficher la correction';
+                }
+            }
+
+            // Écouteurs d'événements
+            btnNew.addEventListener('click', renderNewWorksheet);
+            btnToggleCorr.addEventListener('click', toggleCorrection);
+            btnPrint.addEventListener('click', () => window.print());
+
+            // Génération initiale au chargement de la page
+            renderNewWorksheet();
+        })();
+    </script>
+</body>
+</html>
